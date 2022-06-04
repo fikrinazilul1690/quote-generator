@@ -5,8 +5,6 @@ const twitterButton = document.getElementById('twitter');
 const newQuoteButton = document.getElementById('new-quote');
 const loader = document.getElementById('loader');
 
-let apiQuotes = [];
-
 // Show Loading
 function loading() {
 	loader.hidden = false;
@@ -20,13 +18,13 @@ function complete() {
 }
 
 // Show New Quote
-function newQuote() {
+async function newQuote() {
 	loading();
 	// Pick a random quote from apiQuotes array
+	const apiQuotes = await getApiQuotes();
 	const quote = apiQuotes[Math.floor(Math.random() * apiQuotes.length)];
 	const authorContent = quote.author !== null ? quote.author : 'Unknown';
 	const quoteStyle = quote.text.length > 50 ? 'long-quote' : '';
-	console.log(quoteStyle);
 	quoteText.className = quoteStyle;
 	authorText.textContent = authorContent;
 	// Set Quote, Hide Loader
@@ -34,15 +32,21 @@ function newQuote() {
 	complete();
 }
 
-// Ger Quotes From API
-async function getQuotes() {
+// Get Quotes From API
+function getQuotes() {
 	loading();
 	const apiUrl = 'https://type.fit/api/quotes';
+	const request = new Request(apiUrl);
+	const response = fetch(request);
+	// return (apiQuotes = response.json());
+	return response.then((response) => response.json());
+}
+
+// Get Data
+async function getApiQuotes() {
 	try {
-		const request = new Request(apiUrl);
-		const response = await fetch(request);
-		apiQuotes = await response.json();
-		newQuote();
+		const data = await getQuotes();
+		return data;
 	} catch (error) {
 		// Catch Error Here
 	}
@@ -59,4 +63,4 @@ newQuoteButton.addEventListener('click', newQuote);
 twitterButton.addEventListener('click', tweetQuote);
 
 // On Load
-getQuotes();
+newQuote();
